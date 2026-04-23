@@ -30,6 +30,8 @@ CTE_PLANO_ORIGINAL AS (
         h.op_code,
         h.product_sku,
         h.cycle_name,
+        h.supplier_name,
+        h.product_name,
         h.planned_quantity AS baseline_planned_qty,
         h.dt_planned_entry_warehouse AS baseline_dt_planned,
         h.dt_reviewed_entry_warehouse AS baseline_dt_reviewed,
@@ -78,6 +80,8 @@ CTE_WEEKLY_SNAPSHOTS AS (
         orig.op_code,
         orig.product_sku,
         orig.cycle_name,
+        orig.supplier_name,
+        orig.product_name,
         w.snapshot_week,
         ARRAY_AGG(
             STRUCT(
@@ -99,7 +103,7 @@ CTE_WEEKLY_SNAPSHOTS AS (
         AND h.production_order_type NOT IN ('flexible', 'converted')
         AND h.ingestion_date >= orig.baseline_date
         AND h.ingestion_date <= DATE_ADD(w.snapshot_week, INTERVAL 6 DAY)
-    GROUP BY orig.op_code, orig.product_sku, orig.cycle_name, w.snapshot_week
+    GROUP BY orig.op_code, orig.product_sku, orig.cycle_name, orig.supplier_name, orig.product_name, w.snapshot_week
 ),
 
 CTE_CANCELAMENTOS AS (
@@ -115,6 +119,8 @@ CTE_DETAIL AS (
     SELECT
         w.snapshot_week,
         orig.cycle_name,
+        orig.supplier_name,
+        orig.product_name,
 
         CASE
             WHEN REGEXP_CONTAINS(orig.cycle_name, r'^C\d{2}20\d{2}') THEN 'Base'
@@ -203,11 +209,13 @@ CTE_DETAIL AS (
         ON orig.op_code = canc.op_code
 )
 
--- Agregação por semana × ciclo
+-- Agregação por semana × ciclo × fornecedor × produto
 SELECT
     snapshot_week,
     cycle_name,
     cycle_type,
+    supplier_name,
+    product_name,
     SUM(baseline_planned_qty)   AS vol_original,
     SUM(vol_int_date)           AS vol_int_date,
     SUM(vol_int_cancel)         AS vol_int_cancel,
@@ -217,5 +225,5 @@ SELECT
     SUM(vol_ext_date_rev)       AS vol_ext_date_rev,
     SUM(vol_ext_any)            AS vol_ext_any
 FROM CTE_DETAIL
-GROUP BY snapshot_week, cycle_name, cycle_type
-ORDER BY snapshot_week, cycle_name
+GROUP BY snapshot_week, cycle_name, cycle_type, supplier_name, product_name
+ORDER BY snapshot_week, cycle_name, supplier_name, product_name
