@@ -213,3 +213,110 @@ KR1 = 1 - (vol_int_any / vol_original)
 - `vol_int_any`: número de OP-SKUs com pelo menos 1 flag INT ativa
 
 **Interpretação:** % do plano original que foi mantido sem interferências internas. Meta: maior é melhor (100% = nenhuma mudança interna após congelamento).
+
+---
+
+# Base de Dados: insider-lake-sensitive (Lead Time Dashboard)
+
+**Projeto BigQuery:** `insider-lake-sensitive`
+**Região:** `southamerica-east1`
+**Contexto:** Data Lake "sensível" — contém snapshots brutos das tabelas operacionais do Muninn. Usada como fonte histórica de OPs no dashboard de lead time.
+
+---
+
+### 4. `landing_br.muninn_production_orders_raw`
+
+**Tipo:** Tabela de snapshot diário (uma "imagem" da tabela do Muninn a cada começo de dia).
+**Particionamento:** `ingestion_date`
+**Volume:** ~4,2 milhões de linhas | ~422 partições | ~13.071 OPs distintas (desde 2025-03-11).
+**Grão:** Uma linha por `(id, ingestion_date)` — estado da OP no início de cada dia.
+
+**Descrição:** Substitui a antiga `insider-iop.muninn_append_public.ProductionOrders` (tabela CDC) como fonte histórica de status/etapas das OPs. Ambas contêm os dados históricos de OPs, mas:
+
+| Aspecto | `insider-iop.muninn_append_public.ProductionOrders` (CDC) | `insider-lake-sensitive.landing_br.muninn_production_orders_raw` (snapshot diário) |
+|---|---|---|
+| Estratégia de captura | Change Data Capture: uma linha por **mudança** | Snapshot completo no início de cada dia |
+| Granularidade temporal | Segundo (`datastream_metadata.source_timestamp`) | Dia (`ingestion_date`) |
+| Deduplicação | Necessária via `ROW_NUMBER() OVER(PARTITION BY id ORDER BY source_timestamp DESC)` | Não necessária — `(id, ingestion_date)` já é único |
+| `order_code` por id | Constante; original usava `MAX(CASE WHEN rnk=1 THEN order_code END)` | Constante; usar `ANY_VALUE(order_code)` |
+| Acesso | Pode estar restrito (`403 Access Denied`) | Disponível ao time de Supply Chain |
+
+**Padrão de uso para stamps de etapa (substituindo a query CDC):**
+```sql
+SELECT
+  id,
+  ANY_VALUE(order_code) AS op_code,
+  MIN(CAST(ingestion_date AS TIMESTAMP)) AS stamp_created_production_order,
+  MIN(CASE WHEN status = '<status-da-etapa>'
+           THEN CAST(ingestion_date AS TIMESTAMP) END) AS stamp_stage_xxx
+FROM `insider-lake-sensitive.landing_br.muninn_production_orders_raw`
+GROUP BY id
+```
+
+#### Colunas Principais
+
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| `id` | INT64 | ID interno da OP no Muninn (chave de agrupamento) |
+| `order_code` | STRING | Código da OP — **chave de JOIN com `op_code`** da SCEMI |
+| `ingestion_date` | DATE | Data do snapshot (partição). Usado como proxy temporal das transições de status |
+| `status` | STRING | Status operacional da OP (ex: `hike_bpm_op_Fornecedor__Em_Costura`). Base para mapear `production_stage` |
+| `acceptance_status` | STRING | Status de aceitação (`accepted`, `accepted_with_changes`, etc) |
+| `type` | STRING | Tipo da ordem |
+| `is_finished_product_order` | BOOL | Indica se é OP de produto acabado |
+| `is_size_set_order` | BOOL | Pedido de grade completa |
+| `is_international` | BOOL | Produção internacional |
+| `is_custom_receive_at` | BOOL | Data de recebimento customizada |
+| `cycle_id` | INT64 | ID do ciclo no Muninn |
+| `product_id` / `product_color_id` | INT64 | IDs do produto/cor |
+| `apparel_manufacturer_id` / `apparel_manufacturer_production_unit_id` | INT64 | IDs do fabricante e célula |
+| `author_id` / `update_author_id` | STRING | Criador / autor da última atualização |
+| `update_source` / `update_reason` | STRING | Fonte e motivo da atualização |
+| `send_at` / `receive_at` | DATE | Datas reais de envio/recebimento |
+| `planned_send_at` / `planned_receive_at` | DATE | Datas planejadas |
+| `planned_demand_date` | DATE | Data de demanda planejada |
+| `planned_production_start_date` / `planned_production_finish_date` | DATE | Janela planejada de produção |
+| `real_production_start_date` / `real_production_finish_date` / `real_production_end_date` | DATE | Marcos reais de produção |
+| `planned_production_delivery_date` / `expected_production_delivery_date` / `real_production_delivery_date` | DATE | Entrega planejada / esperada / real |
+| `planned_fabric_shipping_date` / `expected_fabric_shipping_date` / `real_fabric_shipping_date` | DATE | Envio de tecido (planejado / esperado / real) |
+| `planned_fabric_delivery_date` / `expected_fabric_delivery_date` / `real_fabric_delivery_date` | DATE | Recebimento de tecido pelo fornecedor |
+| `expected_fabric_receiving_date` / `real_fabric_receiving_date` | DATE | Recebimento físico de tecido |
+| `fabric_reservation_date` | DATE | Data de reserva do tecido |
+| `full_quality_inspection_completion_date` | DATE | Conclusão da inspeção de qualidade |
+| `planned_foreign_port_delivery_date` / `real_foreign_port_delivery_date` | DATE | Entrega em porto estrangeiro (importação) |
+| `planned_production_shipping_date` / `real_production_shipping_date` | DATE | Embarque da produção |
+| `planned_lead_time` | INT64 | Lead time planejado (dias) |
+| `planned_manufacturer_cost` | NUMERIC | Custo planejado do fabricante |
+| `actual_product_cost` | NUMERIC | Custo real do produto |
+| `planned_product_grade_id` | INT64 | ID do grade planejado |
+| `industrialization_depart_status` / `industrialization_completion_status` | STRING | Status de industrialização |
+| `destination_channel` | STRING | Canal de destino |
+| `status_blockers` | STRING | Bloqueios atuais |
+| `status_updated_at` | DATE | Data da última mudança de status |
+| `last_associated_sku_change_date` / `last_issued_at` | DATE | Últimas mudanças relevantes |
+| `production_notes` / `private_production_notes` / `public_production_notes` | STRING | Notas |
+| `canceled_at` / `canceled_production_reason` | DATE / STRING | Cancelamento e motivo |
+| `created_at` / `updated_at` | DATETIME | Timestamps de criação/atualização da OP no Muninn |
+
+**Mapeamento `status` → `production_stage` (usado no dashboard de lead time):**
+
+| `production_stage` (canônico) | Valores de `status` |
+|---|---|
+| `order_request_validation` | `hike_bpm_op_PCP__Validacao_Inicial` |
+| `waiting_fabric_arrival` | `hike_bpm_op_Compras_Aguardando_Faturamento_de_Tecidos`, `hike_bpm_op_Compras__Tecidos_Faturados`, `hike_bpm_op_Fornecedor__Validacao_de_Quantidade_de_Tecido`, `hike_bpm_op_Fornecedor__Validacao_de_Qualidade_de_Tecido` |
+| `fabric_validation_and_pre_cutting` | `hike_bpm_op_Fornecedor__Descanso_do_Tecido`, `hike_bpm_op_PF__Aprovacao_de_Encaixe`, `hike_bpm_op_Fornecedor__Corte` |
+| `cut_fabric_and_sewing_process` | `hike_bpm_op_Fornecedor__Fila_de_Costura`, `hike_bpm_op_Fornecedor__Em_Costura`, `hike_bpm_op_Fornecedor__Em_Acabamento` |
+| `quality_inspection` | `hike_bpm_op_Qualidade__Inspecao_em_Andamento` |
+| `items_delivery_and_invoicing` | `hike_bpm_op_PCP__Aguardando_Faturamento`, `hike_bpm_op_PCP__Faturamento_em_Andamento` |
+| `finished` | `hike_bpm_op_Encerrado` |
+| `canceled` | `hike_bpm_op_Pedido_Cancelado` |
+
+**Chave de JOIN com SCEMI:**
+```sql
+LEFT JOIN `insider-lake-sensitive.landing_br.muninn_production_orders_raw` AS po
+  ON po.order_code = scemi.op_code
+```
+
+**Uso no projeto:** [notebooks/lead_time_dashboard.ipynb](notebooks/lead_time_dashboard.ipynb) (cell-2, `SQL_OPS`).
+
+**Limitação conhecida:** durações intra-dia (latência em horas dentro de um mesmo `ingestion_date`) não são observáveis — para isso, seria necessária a tabela CDC original.

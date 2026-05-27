@@ -1,0 +1,22 @@
+INFO  2026-05-08 15:15:59,896 serena.cli:health_check:920 - Starting health check for project: /Users/insider/LA_Coding_Projects/mp_skp_project
+INFO  2026-05-08 15:15:59,899 serena.cli:health_check:924 - Creating SerenaAgent with disabled dashboard...
+INFO  2026-05-08 15:15:59,906 serena.util.file_system:stop:336 - Loading of .gitignore files completed in 0.023 seconds
+INFO  2026-05-08 15:15:59,910 serena.project:stop:336 - Gathering ignore spec for project mp_skp_project completed in 0.029 seconds
+INFO  2026-05-08 15:16:00,552 serena.agent:__init__:589 - Will record tool usage statistics with token count estimator: CHAR_COUNT.
+INFO  2026-05-08 15:16:00,803 serena.agent:__init__:593 - Starting Serena server (version=1.2.0, process id=51942, parent process id=1225; language backend=LSP); Python version=3.13.13, platform=macOS-15.6-arm64-arm-64bit-Mach-O
+INFO  2026-05-08 15:16:00,807 serena.agent:__init__:597 - Configuration file: /Users/insider/.serena/serena_config.yml
+INFO  2026-05-08 15:16:00,817 serena.agent:__init__:598 - Available projects: mp_skp_project
+INFO  2026-05-08 15:16:00,821 serena.agent:__init__:599 - Loaded tools (46): read_file, create_text_file, list_dir, find_file, replace_content, delete_lines, replace_lines, insert_at_line, search_for_pattern, restart_language_server, get_symbols_overview, find_symbol, find_referencing_symbols, replace_symbol_body, insert_after_symbol, insert_before_symbol, rename_symbol, safe_delete_symbol, write_memory, read_memory, list_memories, delete_memory, rename_memory, edit_memory, execute_shell_command, open_dashboard, activate_project, remove_project, get_current_config, check_onboarding_performed, onboarding, initial_instructions, serena_info, jet_brains_find_symbol, jet_brains_move, jet_brains_safe_delete, jet_brains_inline_symbol, jet_brains_find_referencing_symbols, jet_brains_get_symbols_overview, jet_brains_type_hierarchy, jet_brains_find_declaration, jet_brains_find_implementations, jet_brains_rename, jet_brains_debug, list_queryable_projects, query_project
+INFO  2026-05-08 15:16:00,841 serena.agent:__init__:611 - Using language backend from global configuration: LSP
+ERROR 2026-05-08 15:16:00,846 serena.cli:health_check:1032 - Health check failed with exception: [Errno 1] Operation not permitted: '/Users/insider/.serena/prompt_templates'
+Traceback (most recent call last):
+  File "/Users/insider/.local/share/uv/tools/serena-agent/lib/python3.13/site-packages/serena/cli.py", line 926, in health_check
+    agent = SerenaAgent(project=project_path, serena_config=serena_config)
+  File "/Users/insider/.local/share/uv/tools/serena-agent/lib/python3.13/site-packages/serena/agent.py", line 618, in __init__
+    self.prompt_factory = SerenaPromptFactory()
+                          ~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/insider/.local/share/uv/tools/serena-agent/lib/python3.13/site-packages/serena/prompt_factory.py", line 15, in __init__
+    os.makedirs(user_templates_dir, exist_ok=True)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen os>", line 228, in makedirs
+PermissionError: [Errno 1] Operation not permitted: '/Users/insider/.serena/prompt_templates'

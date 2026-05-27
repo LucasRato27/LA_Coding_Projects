@@ -1,5 +1,5 @@
 # the name by which the project can be referenced within Serena
-project_name: "LA_Coding_Projects"
+project_name: "mp_skp_project"
 
 
 # list of languages for which language servers are started; choose from:
@@ -26,7 +26,8 @@ project_name: "LA_Coding_Projects"
 # When using multiple languages, the first language server that supports a given file will be used for that file.
 # The first language is the default language and the respective language server will be used as a fallback.
 # Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
-languages: []
+languages:
+- markdown
 
 # the encoding used by text files in the project
 # For a list of possible encodings, see https://docs.python.org/3.11/library/codecs.html#standard-encodings
@@ -134,68 +135,6 @@ default_modes:
 # (contrary to the memories, which are loaded on demand).
 initial_prompt: ""
 
-# --- CONTEXTO: Governança de Lead Time (adicionado 2026-05-13; atualizado 2026-05-14) ---
-#
-# Duas queries SQL alimentam o dashboard de lead time:
-#
-# 1. QUERY DE CAPACIDADE (df_capacity)
-#    Fonte: insider-data-lake.integrated.muninn_apparel_manufacturer_production_units_products
-#           (+ joins em muninn_apparel_manufacturers_products, muninn_products,
-#            muninn_apparel_manufacturers, muninn_suppliers, muninn_fabrics, etc.)
-#    O que contém: fornecedores ativos (alias), produtos, lead_time teórico declarado,
-#                  capacidade semanal/mensal, mark-up, tag ABC (curva de receita dos últimos 3 meses),
-#                  num_suppliers_per_product (para identificar single-source).
-#    Filtros aplicados: status IN ('available','approved','incubation'),
-#                       product_state NOT IN ('desativado'),
-#                       weekly_maximum_productive_capacity > 0.
-#
-# 2. QUERY DE OPs COM STAMPS (df_ops_raw)
-#    Fonte: insider-data-lake.sop_silver.supply_chain_efficiency_model_input (detalhes da OP)
-#           + insider-lake-sensitive.landing_br.muninn_production_orders_raw (histórico de status)
-#    O que contém: op_code, supplier_name, product_names, is_finished_product_order,
-#                  dt_largest_entry_warehouse, planned_quantity_op,
-#                  stamps de entrada em cada etapa de produção:
-#                    - order_request_validation
-#                    - waiting_fabric_arrival
-#                    - fabric_validation_and_pre_cutting
-#                    - cut_fabric_and_sewing_process
-#                    - quality_inspection
-#                    - items_delivery_and_invoicing
-#                    - finished
-#    Filtros aplicados no notebook: production_order_type='committed',
-#                                   cycle_name sem 'B2B' ou 'EPA',
-#                                   lead_time_realizado > 0.
-#
-# ATENÇÃO — TROCA DE FONTE HISTÓRICA DE OPs (2026-05-14):
-#   ANTES: `insider-iop.muninn_append_public.ProductionOrders`
-#          → tabela CDC (Change Data Capture). Cada mudança gerava uma linha
-#            com `datastream_metadata.source_timestamp` em granularidade de segundo.
-#            Stamps por estágio = `MIN(source_timestamp WHERE status=X)`.
-#            Permissão pode estar restrita (causava `403 Access Denied`).
-#   DEPOIS: `insider-lake-sensitive.landing_br.muninn_production_orders_raw`
-#          → tabela de snapshot diário. Uma linha por (id, ingestion_date),
-#            com o estado da OP no começo de cada dia.
-#            Stamps por estágio = `MIN(ingestion_date WHERE status=X)` → granularidade DIÁRIA.
-#            Não tem `datastream_metadata`; não precisa de ROW_NUMBER para deduplicar
-#            (cada (id, ingestion_date) já é único). `order_code` é constante por id,
-#            então `ANY_VALUE(order_code)` substitui o `MAX(CASE WHEN rnk=1 THEN ...)`.
-#            Volume: ~4,2M linhas | ~13k OPs distintas | 422 snapshots desde 2025-03-11.
-#   IMPACTO ANALÍTICO: lead_time_realizado e durações de etapa têm precisão de dia
-#                      em vez de segundo. Para análises de fluxo (dias por etapa)
-#                      isso é equivalente. Para latência intra-dia (raríssimo aqui),
-#                      voltar à tabela CDC se houver acesso.
-#
-# CAMPOS DERIVADOS NO NOTEBOOK (notebook: notebooks/lead_time_dashboard.ipynb):
-#    - lead_time_realizado: dt_largest_entry_warehouse - stamp_created_production_order (dias)
-#    - etapa_pre_costura: order_request_validation → cut_fabric_and_sewing_process
-#    - etapa_costura_inspecao: cut_fabric_and_sewing_process → items_delivery_and_invoicing
-#    - etapa_pos_inspecao: items_delivery_and_invoicing → finished
-#    - desvio_lt: lead_time_realizado - lead_time_teorico
-#    - volume_bucket: faixas <200 / 200–499 / 500–999 / 1000–1999 / 2000–4999 / 5000+
-#
-# TARGET: 120 dias (padrão atual Insider). Revisão em andamento para segmentar por fluxo:
-#         Triangulação high-perf → 60d | Produto Acabado crítico → 150d.
-
 # time budget (seconds) per tool call for the retrieval of additional symbol information
 # such as docstrings or parameter information.
 # This overrides the corresponding setting in the global configuration; see the documentation there.
@@ -211,5 +150,5 @@ read_only_memory_patterns: []
 # and cannot be accessed via read_memory or write_memory.
 # To access ignored memory files, use the read_file tool on the raw file path.
 # Extends the list from the global configuration, merging the two lists.
-# Example: ["_archive/.*", "_episodes/.*"
+# Example: ["_archive/.*", "_episodes/.*"]
 ignored_memory_patterns: []

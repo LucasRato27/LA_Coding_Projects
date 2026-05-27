@@ -1,0 +1,30 @@
+supplier_name,Cascade hist > 50%,M-1 ou M-2 acima limiar,Janela operacional (M/M+1),Aumento em M (semana),n_crivos
+BAE BRASIL,True,True,True,True,4
+MAURA,True,True,True,True,4
+"Ges Confecção, Comercio e Serviços  de Serigrafia LTDA",True,True,True,True,4
+ART LIVRE,True,True,True,True,4
+INDÚSTRIA TEXTIL BETILHA LTDA,True,True,False,True,3
+RIZLLEP,True,True,False,True,3
+RDM,False,True,True,True,3
+BY COTTON,True,True,True,False,3
+PIXIE,True,True,False,True,3
+DALOP,True,True,False,True,3
+DDAL,False,True,True,True,3
+LATINA,True,True,False,False,2
+NATURAL COMPANY CONFECCOES LTDA,True,True,False,False,2
+MC & MC,False,True,False,True,2
+MASH,False,False,True,True,2
+LUTESTIL,True,True,False,False,2
+ABBA,False,False,True,True,2
+KABRIOLLI,True,False,True,False,2
+INTERTEXTIL,True,True,False,False,2
+FABIO,True,True,False,False,2
+LUNELLI,False,False,False,True,1
+MALHAS D'STEFANO,False,False,False,True,1
+GOAT,False,False,True,False,1
+CLESTE BRASIL CONFECÇÕES LTDA,True,False,False,False,1
+CLARA BELLA,True,False,False,False,1
+CENTRAL DA MODELAGEM,True,False,False,False,1
+AZZURRA,True,False,False,False,1
+ARTIGO X,False,True,False,False,1
+WARUSKY,True,False,False,False,1

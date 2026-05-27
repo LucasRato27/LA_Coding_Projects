@@ -1,1 +1,6 @@
 .venv/
+secrets/
+*.service-account.json
+.DS_Store
+*.zip
+.serena/memories/

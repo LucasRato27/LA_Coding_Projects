@@ -1,0 +1,2 @@
+analysis_date,window_start_date,window_end_date,supplier_id,supplier_alias,supplier_legal_name,total_detractor_ops_not_arrived,ops_without_entry_warehouse_date,ops_with_future_entry_warehouse_date,ops_with_both_fabric_dates,ops_fabric_late,pct_late_over_detractor_ops,pct_late_over_ops_with_both_dates,avg_delay_days_late_ops,min_delay_days_late_ops,max_delay_days_late_ops,min_planned_entry_warehouse,max_planned_entry_warehouse
+2026-04-27,2026-03-13,2026-04-27,16,DDAL,DDAL CONFECCOES LTDA,18,18,0,7,5,0.2777777777777778,0.7142857142857143,15.2,8,25,2026-03-16,2026-04-27

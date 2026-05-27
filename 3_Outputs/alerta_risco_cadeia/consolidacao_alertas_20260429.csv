@@ -1,0 +1,28 @@
+supplier_name,Cascade hist > 50%,M-1 ou M-2 acima limiar,Janela operacional (M/M+1),n_crivos
+"Ges Confecção, Comercio e Serviços  de Serigrafia LTDA",True,True,True,3
+BAE BRASIL,True,True,True,3
+BY COTTON,True,True,True,3
+ART LIVRE,True,True,True,3
+MAURA,True,True,True,3
+FABIO,True,True,False,2
+LATINA,True,True,False,2
+KABRIOLLI,True,False,True,2
+INTERTEXTIL,True,True,False,2
+INDÚSTRIA TEXTIL BETILHA LTDA,True,True,False,2
+DALOP,True,True,False,2
+DDAL,False,True,True,2
+NATURAL COMPANY CONFECCOES LTDA,True,True,False,2
+PIXIE,True,True,False,2
+RDM,False,True,True,2
+RIZLLEP,True,True,False,2
+LUTESTIL,True,True,False,2
+MASH,False,False,True,1
+MC & MC,False,True,False,1
+ABBA,False,False,True,1
+GOAT,False,False,True,1
+CLESTE BRASIL CONFECÇÕES LTDA,True,False,False,1
+CLARA BELLA,True,False,False,1
+CENTRAL DA MODELAGEM,True,False,False,1
+AZZURRA,True,False,False,1
+ARTIGO X,False,True,False,1
+WARUSKY,True,False,False,1

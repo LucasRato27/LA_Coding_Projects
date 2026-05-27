@@ -1,0 +1,6 @@
+causa_raiz,qtd_ops,volume_pecas,pct_do_volume_total
+Lead Time Produtivo (45 dias),11,9203,0.5879008560112431
+Atraso de Mp,5,7346,0.4692730292576977
+Reprovacao de Qualidade (Entrega Autorizada),5,4932,0.31506324262169416
+Mp entregue dentro de um Lead Time menor que 45 dias,3,3365,0.21496103232400665
+Reprovacao de Qualidade (Corrigir e Reauditar),1,754,0.04816660278523061

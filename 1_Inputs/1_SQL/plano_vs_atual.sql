@@ -106,6 +106,7 @@ SELECT
     orig.supplier_name,
     orig.product_name,
     orig.product_color,
+    
     orig.product_size,
     orig.is_finished_product_order,
     orig.production_order_type,

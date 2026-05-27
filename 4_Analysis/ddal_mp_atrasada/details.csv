@@ -1,0 +1,19 @@
+order_code,cycle_name,sc_supplier_name,current_production_stages,dt_min_entry_warehouse,dt_planned_entry_warehouse,dt_reviewed_entry_warehouse,planned_quantity_op,received_quantity_op,status,production_stage,supplier_id,supplier_alias,supplier_legal_name,expected_fabric_receiving_date,real_fabric_receiving_date,fabric_receiving_delay_days,fabric_receiving_status
+OPF74N286,EPA2201,DDAL,items_delivery_and_invoicing,,2026-04-17,2026-04-17,1599,,items_delivery_and_invoicing,items_delivery_and_invoicing,16,DDAL,DDAL CONFECCOES LTDA,2026-03-04,2026-02-09,-23,EARLY
+OPF74N290,INS3001,DDAL,cut_fabric_and_sewing_process,,2026-04-27,2026-05-18,1230,,cut_fabric_and_sewing_process,cut_fabric_and_sewing_process,16,DDAL,DDAL CONFECCOES LTDA,2026-03-20,2026-04-14,25,LATE
+OPF74N268,EPA0901,DDAL,items_delivery_and_invoicing,,2026-04-27,2026-04-27,1099,,items_delivery_and_invoicing,items_delivery_and_invoicing,16,DDAL,DDAL CONFECCOES LTDA,2026-03-04,2026-03-23,19,LATE
+OPF74N230,C032026,DDAL,items_delivery_and_invoicing,,2026-04-27,2026-04-24,2000,,items_delivery_and_invoicing,items_delivery_and_invoicing,16,DDAL,DDAL CONFECCOES LTDA,2026-01-12,2026-01-26,14,LATE
+OPF74N272,C052026,DDAL,cut_fabric_and_sewing_process,,2026-04-13,2026-05-04,1036,,cut_fabric_and_sewing_process,cut_fabric_and_sewing_process,16,DDAL,DDAL CONFECCOES LTDA,2026-03-20,2026-03-30,10,LATE
+OPF74N251,C042026,DDAL,items_delivery_and_invoicing,,2026-04-13,2026-04-24,1981,,items_delivery_and_invoicing,items_delivery_and_invoicing,16,DDAL,DDAL CONFECCOES LTDA,2026-02-10,2026-02-18,8,LATE
+OPF74N224,C022026,DDAL,items_delivery_and_invoicing,,2026-04-27,2026-04-24,754,,items_delivery_and_invoicing,items_delivery_and_invoicing,16,DDAL,DDAL CONFECCOES LTDA,,,,MISSING_EXPECTED_DATE
+OPF74N226,C022026,DDAL,cut_fabric_and_sewing_process,,2026-04-27,2026-05-11,542,,cut_fabric_and_sewing_process,cut_fabric_and_sewing_process,16,DDAL,DDAL CONFECCOES LTDA,,,,MISSING_EXPECTED_DATE
+OPF74N227,C022026,DDAL,items_delivery_and_invoicing,,2026-04-27,2026-04-24,776,,items_delivery_and_invoicing,items_delivery_and_invoicing,16,DDAL,DDAL CONFECCOES LTDA,,,,MISSING_EXPECTED_DATE
+OPF74N240,C032026,DDAL,cut_fabric_and_sewing_process,,2026-04-27,2026-05-04,380,,cut_fabric_and_sewing_process,cut_fabric_and_sewing_process,16,DDAL,DDAL CONFECCOES LTDA,,,,MISSING_EXPECTED_DATE
+OPF74N238,C032026,DDAL,items_delivery_and_invoicing,,2026-04-24,2026-04-24,224,,items_delivery_and_invoicing,items_delivery_and_invoicing,16,DDAL,DDAL CONFECCOES LTDA,,,,MISSING_EXPECTED_DATE
+OPF74N239,C032026,DDAL,items_delivery_and_invoicing,,2026-04-24,2026-04-24,380,,items_delivery_and_invoicing,items_delivery_and_invoicing,16,DDAL,DDAL CONFECCOES LTDA,,,,MISSING_EXPECTED_DATE
+OPF74N216,C022026,DDAL,items_delivery_and_invoicing,,2026-04-20,2026-04-24,607,,items_delivery_and_invoicing,items_delivery_and_invoicing,16,DDAL,DDAL CONFECCOES LTDA,,,,MISSING_EXPECTED_DATE
+OPF74N243,C032026,DDAL,quality_inspection,,2026-04-20,2026-05-04,172,,quality_inspection,quality_inspection,16,DDAL,DDAL CONFECCOES LTDA,,,,MISSING_EXPECTED_DATE
+OPF74N218,C022026,DDAL,items_delivery_and_invoicing,,2026-04-17,2026-04-24,598,,items_delivery_and_invoicing,items_delivery_and_invoicing,16,DDAL,DDAL CONFECCOES LTDA,,,,MISSING_EXPECTED_DATE
+OPF74N260,C042026,DDAL,quality_inspection,,2026-04-06,2026-05-04,518,,quality_inspection,quality_inspection,16,DDAL,DDAL CONFECCOES LTDA,,,,MISSING_EXPECTED_DATE
+OPF74N220,C022026,DDAL,finished,,2026-03-27,2026-04-01,756,49,finished,finished,16,DDAL,DDAL CONFECCOES LTDA,,,,MISSING_EXPECTED_DATE
+OPF74N248,EPA0512,DDAL,finished,,2026-03-16,2026-03-20,1002,,finished,finished,16,DDAL,DDAL CONFECCOES LTDA,2026-01-23,2026-01-23,0,ON_TIME
