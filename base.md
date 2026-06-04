@@ -90,7 +90,7 @@ WHERE production_order_type NOT IN ('flexible', 'converted')
 
 **Colunas:** Idênticas à `supply_chain_efficiency_model_input_history` (sem a dimensão temporal de `ingestion_date` como histórico).
 
-**Uso no projeto:** Exclusivamente em [Testes/teste.sql](1_Inputs/1_SQL/Testes/teste.sql) e [Testes/scemi.sql](1_Inputs/1_SQL/Testes/scemi.sql).
+**Uso no projeto:** Exclusivamente em queries de teste pontuais (arquivos removidos na reorganização do projeto).
 
 ---
 
@@ -317,6 +317,6 @@ LEFT JOIN `insider-lake-sensitive.landing_br.muninn_production_orders_raw` AS po
   ON po.order_code = scemi.op_code
 ```
 
-**Uso no projeto:** [notebooks/lead_time_dashboard.ipynb](notebooks/lead_time_dashboard.ipynb) (cell-2, `SQL_OPS`).
+**Uso no projeto:** [analytics/lead_time/lead_time_dashboard.ipynb](analytics/lead_time/lead_time_dashboard.ipynb) (cell-2, `SQL_OPS`).
 
 **Limitação conhecida:** durações intra-dia (latência em horas dentro de um mesmo `ingestion_date`) não são observáveis — para isso, seria necessária a tabela CDC original.
