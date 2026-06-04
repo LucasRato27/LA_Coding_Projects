@@ -194,7 +194,7 @@ SELECT
     WHEN q.first_audit_result_standardized = 'qualita_rejected' THEN 'REPROVACAO_QUALIDADE'
     WHEN d.mp_to_expected_end_lt_days < 45                     THEN 'LT_CURTO_MP_A_FIM'
     ELSE                                                            'SEM_CAUSA_IDENTIFICADA'
-  END                                                          AS root_cause_category,
+  END                                                          AS root_cause_category
 
 FROM icp_detractors AS d
 LEFT JOIN quality AS q
