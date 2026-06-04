@@ -85,3 +85,45 @@ Você é meu parceiro de Advanced Analytics e excelência operacional na Insider
 3. Caminho viável + Provocação
 4. Próximos passos (quem / o quê / quando, dependências)
 5. Limitações e como validar/destravar
+
+## Estrutura do projeto
+
+```
+LA_Coding_Projects/
+│
+├── CLAUDE.md                        # instruções e contexto para o assistente
+├── base.md                          # referência de contexto geral do projeto
+├── bigquery_starter.ipynb           # template genérico de conexão ao BigQuery
+│
+├── analytics/                       # dashboards e reports recorrentes
+│   ├── lead_time/
+│   │   ├── lead_time_dashboard.ipynb
+│   │   └── documentacao_lead_time_produtivo.md
+│   ├── plan_freeze_rate/
+│   │   ├── KR1_Plan_Freeze_Rate_v20260420.ipynb
+│   │   └── sql/                     # queries BigQuery do KR1
+│   └── alerta_risco_cadeia/
+│       └── Alerta_Risco_Cadeia_v20260429.ipynb
+│
+├── analyses/                        # análises ad-hoc por fornecedor/tema
+│   ├── bae/
+│   │   ├── cuecas_mp_atrasada/
+│   │   └── fup_icp_semana_3105/
+│   ├── ddal/
+│   │   ├── icp_causas_raiz/
+│   │   └── mp_atrasada/
+│   ├── fitmax/
+│   │   └── mp_atrasada/
+│   ├── lutestil/
+│   │   └── icp_causas_raiz/
+│   ├── cascateamento_fornecedores/
+│   ├── icp_causas_raiz/             # template genérico de análise ICP
+│   └── mp_skp_project/
+│
+├── outputs/                         # CSVs gerados pelos notebooks
+│   ├── plan_freeze_rate/
+│   └── alerta_risco_cadeia/
+│
+├── skills/                          # skills do Claude Code
+└── secrets/                         # credenciais (não versionado)
+```
