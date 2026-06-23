@@ -1,0 +1,19 @@
+{
+  "servers": {
+    "serena": {
+      "type": "stdio",
+      "command": "/Users/insider/.local/bin/serena",
+      "args": [
+        "start-mcp-server",
+        "--project",
+        "/Users/insider/LA_Coding_Projects",
+        "--context",
+        "desktop-app",
+        "--transport",
+        "stdio",
+        "--open-web-dashboard",
+        "False"
+      ]
+    }
+  }
+}
