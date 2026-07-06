@@ -40,12 +40,13 @@ Análise de **287 produtos** com 12 meses de dados de reversas (Troquecommerce).
 
 | Tabela | Uso |
 |---|---|
-| `integrated.orders` | Pedidos válidos: pagos/parcialmente reembolsados, não teste/interno/cancelado |
-| `integrated.order_items` | Denominador de unidades vendidas por SKU, loja `shopify_insider-store-loja` |
-| `integrated.skus` | Dimensão produto: `product_name`, `category`, `gender`, `color`, `size`, `sku_state` |
-| `prepared_br.prepared__troquecommerce_order_details_br` | Reversas ativas (status ≠ Cancelado), deduplicadas por `(order_name, sku)` |
+| `business.insider_orders` | Pedidos válidos: `order_status = 'paid'`, `is_cancelled = FALSE`, exclusão cupons internos, lojas `shopify_insider-world` + `shopify_insider-store-loja` |
+| `business.insider_order_items` | Itens de pedido: `sku`, `quantity`, `product_title`, `variant_color`, `variant_size` |
+| `fpa.analytical_dre` | Receita e volume de vendas: `revenue_after_discounts`, `non_refunded_quantity` (agregado por `product_name`) |
+| `integrated.skus` | Dimensão SKU (fallback): `product_name`, `category`, `gender`, `color`, `size`, `sku_state` |
+| `prepared_br.prepared__troquecommerce_order_details_br` | Reversas ativas (status ≠ Cancelado), deduplicadas por `(order_name, id_reversa, sku)` |
 | `sop_silver.return_reason_tags` | Tags qualitativas de motivo, deduplicadas por `(order_name, sku)` + UNNEST |
-| `sop_silver.portfolio_skp_clustering` | Cluster estratégico/comercial do SKU |
+| `sop_silver.portfolio_skp_clustering` | Cluster estratégico/comercial do produto (grão `product_name`) |
 
 **Parâmetros:** `min_items_vendidos = 30` · `min_items_returned = 5` · Timezone: `America/Sao_Paulo`
 
@@ -65,7 +66,7 @@ td_score = 0.5 × percentil_td_rate
          + 0.3 × percentil_volume_td
          + 0.2 × percentil_delta_vs_categoria
 
-priority_score = 0.6 × td_score + 0.4 × commercial_score
+priority_score = 0.5 × td_score + 0.5 × commercial_score
 ```
 
 Todos os percentis são calculados com `CUME_DIST()` sobre o universo de produtos com volume suficiente.
@@ -395,4 +396,3 @@ Com base nos ofensores identificados, os maiores drivers de T&D são caimento e 
 | `resumo_tags` | Top tags globais (seção 5) |
 | `priorizar_melhoria` | Top 50 produtos no bucket "Priorizar melhoria" |
 | `relatorio_pf` | Visão consolidada para o time PF: `sinal_kill_keep`, `top_3_motivos_td` (HTML), scores e taxas (seção 9) |
-| `amostra_analitica` | Camada 1 — base analítica item/reversa/tag (se `LOAD_ANALITICA = True`) |

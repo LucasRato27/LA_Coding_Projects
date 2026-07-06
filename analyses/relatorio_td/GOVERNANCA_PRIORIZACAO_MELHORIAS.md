@@ -1,6 +1,8 @@
 # Governança de Priorização de Melhorias de Produtos
 
-**Versão:** 1.0 · **Data:** 11/06/2026
+**Versão:** 2.0 · **Data:** 20/06/2026
+**Notebook canônico:** `analyses/relatorio_td/TD_Priorizacao_Melhorias_Unificado.ipynb`  
+⚠️ `pipeline_reversas_priorizacao_produtos.sql` — **DEPRECATED desde 2026-06-18**  
 **Owner:** Analytics / Supply Chain & SOP
 **Stakeholders:** Time de Produto Físico (PF) · Produto · Comercial
 
@@ -50,15 +52,32 @@ td_score = 0.5 × percentil_td_rate
 
 > Todos os percentis usam `CUME_DIST()` sobre produtos com volume mínimo (≥30 vendas e ≥5 retornos).
 
-### Pilar 2 — Tração Comercial (`commercial_score`)
+### Pilar 2 — Tração Comercial + Margem (`commercial_score_v2`)
 
-Mede o peso comercial do produto no portfólio:
+Mede velocidade comercial e qualidade econômica do produto:
 
 ```
-commercial_score = 0.6 × percentil_receita + 0.4 × percentil_unidades
+commercial_score_v2 = 0.70 × tracao_vendas_score + 0.30 × mc3_score
 ```
 
-> `commercial_score` é relativo ao período analisado (CUME_DIST). Os scores absolutos de portfólio (0–100) de `eval_produto_portfolio` são exibidos como referência na aba `relatorio_pf`, mas **não alimentam o sinal de priorização**.
+**Bloco 1 — Velocidade comercial (`tracao_vendas_score`, 70%):**
+```
+tracao_vendas_score = 0.30 × percentil_sell_through_30d
+                    + 0.30 × percentil_sell_through_60d
+                    + 0.25 × percentil_sell_through_90d
+                    + 0.15 × percentil_receita_media_mensal_vs_categoria
+```
+
+**Bloco 2 — Qualidade econômica (`mc3_score`, 30%):**
+```
+mc3_score = 0.50 × mc3_vs_categoria_score
+           + 0.30 × mc3_vs_portfolio_score
+           + 0.20 × representatividade_mc3_score
+```
+
+Fonte de MC3: `sop_bronze.eval_produto_portfolio` (~126/287 produtos). Fallback automático para score legado `(0.60 × percentil_receita + 0.40 × percentil_unidades)` quando sell-through ou MC3 não estão disponíveis.
+
+> `commercial_score_v2` é relativo ao período analisado (CUME_DIST). Os scores absolutos de portfólio (0–100) de `eval_produto_portfolio` são exibidos como referência na aba `relatorio_pf`, mas **não alimentam o sinal de priorização**.
 
 ---
 
@@ -70,21 +89,21 @@ Calculado em SQL para todos os 287 produtos:
 
 | Sinal | Critério | Significado |
 |---|---|---|
-| 🔴 **Priorizar melhoria** | `td_score ≥ 0.70` e `commercial_score ≥ 0.60` | Alta dor + alta tração — ação imediata justificada |
-| 🟡 **Alerta em produto relevante** | `commercial_score ≥ 0.70` e `0.50 ≤ td_score < 0.70` | Produto de peso com dor moderada em escalada |
-| 🟠 **Monitorar** | `td_score ≥ 0.70` e `commercial_score < 0.60` | Alta dor, mas tração insuficiente para priorizar |
-| ⚪ **Não priorizar agora** | `td_score < 0.50` ou `commercial_score < 0.40` | Sem urgência no momento |
+| 🔴 **Priorizar melhoria** | `td_score ≥ 0.70` e `commercial_score_v2 ≥ 0.60` | Alta dor + alta tração — ação imediata justificada |
+| 🟡 **Alerta em produto relevante** | `commercial_score_v2 ≥ 0.70` e `0.50 ≤ td_score < 0.70` | Produto de peso com dor moderada em escalada |
+| 🟠 **Monitorar** | `td_score ≥ 0.70` e `commercial_score_v2 < 0.60` | Alta dor, mas tração insuficiente para priorizar |
+| ⚪ **Não priorizar agora** | `td_score < 0.50` ou `commercial_score_v2 < 0.40` | Sem urgência no momento |
 | ⬜ **Sem evidência suficiente** | `< 30 vendas` ou `< 5 retornos` | Volume insuficiente para diagnóstico |
 
 ### Nível 2 — Decisão Estratégica (`sinal_kill_keep`, 2 estados)
 
-Calculado em Python sobre `td_score` e `commercial_score` para produtos com evidência suficiente:
+Calculado em Python sobre `td_score` e `commercial_score_v2` para produtos com evidência suficiente:
 
 ```
-Alta T&D (td_score ≥ 0.70) + Alta Tração (commercial_score ≥ 0.60)
+Alta T&D (td_score ≥ 0.70) + Alta Tração (commercial_score_v2 ≥ 0.60)
   → "Priorizar melhoria" — investir em melhoria estrutural
 
-Alta T&D (td_score ≥ 0.70) + Baixa Tração (commercial_score < 0.60)
+Alta T&D (td_score ≥ 0.70) + Baixa Tração (commercial_score_v2 < 0.60)
   → "Não Priorizar (Avaliar Descontinuação/Reformulação)"
 
 Demais casos com evidência
@@ -97,7 +116,7 @@ Demais casos com evidência
 
 ## Matriz de Decisão
 
-|  | **Alta Tração Comercial** (`commercial_score ≥ 0.60`) | **Baixa Tração Comercial** (`commercial_score < 0.60`) |
+|  | **Alta Tração Comercial** (`commercial_score_v2 ≥ 0.60`) | **Baixa Tração Comercial** (`commercial_score_v2 < 0.60`) |
 |---|---|---|
 | **Alta T&D** (`td_score ≥ 0.70`) | 🔴 **Priorizar melhoria** — alto retorno esperado da melhoria | 🟠 **Avaliar descontinuação ou reformulação** — dor alta, mas produto sem tração suficiente |
 | **T&D moderada** (`0.50 ≤ td_score < 0.70`) | 🟡 **Alerta** — monitorar com atenção; risco de escalar | ⚪ **Não priorizar** — baixo impacto comercial e dor contida |
@@ -142,12 +161,12 @@ Produto entra no pipeline
         ▼
   td_score ≥ 0.70?
         │
-        ├── NÃO ──→  commercial_score ≥ 0.70 e td_score ≥ 0.50?
+        ├── NÃO ──→  commercial_score_v2 ≥ 0.70 e td_score ≥ 0.50?
         │                    │
         │              SIM ──→  "Alerta em produto relevante"
         │              NÃO ──→  "Não priorizar agora"
         │
-        └── SIM ──→  commercial_score ≥ 0.60?
+        └── SIM ──→  commercial_score_v2 ≥ 0.60?
                             │
                       SIM ──→  🔴 "Priorizar melhoria"
                                (sinal_kill_keep = Priorizar melhoria)
@@ -176,7 +195,7 @@ Os três pilares de `eval_produto_portfolio` **não determinam** o sinal de prio
 | Tração alta + Satisfação alta + T&D alta | Problema concentrado em SKU/cor específica (ex: transparência em cores claras) — correção cirúrgica recomendada |
 | Cluster KILL + td_score alto | Produto já marcado para saída do portfólio com dor de cliente confirmada — descontinuação acelerada |
 
-> ⚠️ Cobertura parcial: ~126 de 287 produtos têm scorecard preenchido em `eval_produto_portfolio`. Produtos ausentes não são excluídos do farol — o `sinal_kill_keep` continua funcionando via `commercial_score`.
+> ⚠️ Cobertura parcial: ~126 de 287 produtos têm scorecard preenchido em `eval_produto_portfolio`. Produtos ausentes não são excluídos do farol — o `sinal_kill_keep` continua funcionando via `commercial_score_v2` (com fallback automático para score legado).
 
 ---
 
@@ -208,7 +227,7 @@ Os três pilares de `eval_produto_portfolio` **não determinam** o sinal de prio
 
 ## Limitações do Modelo
 
-1. **`commercial_score` é relativo ao período** — um produto pode ter `commercial_score` baixo por estar em ramp-up (lançamento recente), não por ter baixa tração real. Cruzar com `cluster = 'Lancamento'` antes de recomendar descontinuação.
+1. **`commercial_score_v2` é relativo ao período** — o sell-through e os percentis são calculados sobre o período de análise. Um produto em ramp-up pode ter `commercial_score_v2` baixo por estar em fase inicial, não por ter baixa tração real. Cruzar com `cluster = 'Lancamento'` antes de recomendar descontinuação.
 
 2. **Tags não cobrem 100% das reversas** — `pct_top_3_total` é percentual sobre reversas com ao menos uma tag. Produtos com baixa cobertura de tags têm diagnóstico qualitativo incompleto. O `td_rate` e `sinal_kill_keep` permanecem válidos mesmo sem tags.
 
@@ -218,7 +237,7 @@ Os três pilares de `eval_produto_portfolio` **não determinam** o sinal de prio
 
 5. **Tweet analítico é heurístico** — `build_tweet_heuristic()` usa colunas pré-computadas pelo SQL. Não detecta padrões emergentes em comentários ainda não tagueados pelo time de LLM.
 
-6. **Zona cinza do farol** — produtos com `td_score ∈ [0.50, 0.70)` e `commercial_score ∈ [0.40, 0.70)` caem em `Monitorar` via `ELSE`. São dois perfis distintos misturados nesse bucket; usar os scores brutos para distinguir.
+6. **Zona cinza do farol** — produtos com `td_score ∈ [0.50, 0.70)` e `commercial_score_v2 ∈ [0.40, 0.70)` caem em `Monitorar` via `ELSE`. São dois perfis distintos misturados nesse bucket; usar os scores brutos para distinguir.
 
 ---
 
@@ -230,8 +249,8 @@ Os três pilares de `eval_produto_portfolio` **não determinam** o sinal de prio
 | **`td_rate`** | `itens_retornados / itens_vendidos` no período — taxa bruta de T&D do produto |
 | **`delta_vs_categoria`** | `td_rate_produto − td_rate_categoria` — quanto o produto supera o benchmark da categoria |
 | **`td_score`** | Score composto de dor do cliente (0–1, CUME_DIST) |
-| **`commercial_score`** | Score composto de tração comercial (0–1, CUME_DIST) |
-| **`priority_score`** | `0.6 × td_score + 0.4 × commercial_score` — ranking global |
+| **`commercial_score_v2`** | Score composto de tração comercial + margem (0–1): 0.70 × tracao_vendas + 0.30 × mc3 (CUME_DIST) |
+| **`priority_score`** | `0.50 × td_score + 0.50 × commercial_score_v2` — ranking global |
 | **`sinal_priorizacao`** | Farol operacional de 5 buckets — gerado em SQL |
 | **`sinal_kill_keep`** | Decisão estratégica de 2 estados — gerado em Python |
 | **`pct_top_3_total`** | % das reversas tagueadas que os 3 principais motivos representam — alavanca potencial |

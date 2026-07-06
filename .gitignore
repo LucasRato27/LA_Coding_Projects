@@ -3,4 +3,6 @@ secrets/
 *.service-account.json
 .DS_Store
 *.zip
-.serena/memories/
+.serena/
+__pycache__/
+*.pyc

@@ -1,6 +1,18 @@
 -- ==============================================================================
 -- PIPELINE DE ANÁLISE DE REVERSAS E PRIORIZAÇÃO DE PRODUTOS
 -- ==============================================================================
+-- ⚠️ ATENÇÃO: Este arquivo está DESATUALIZADO desde 2026-06-18.
+-- A versão canônica vive em TD_Priorizacao_Melhorias_Unificado.ipynb (células 7 e 8).
+--
+-- Mudanças v2 (2026-06-18):
+--   - Vendas: migrado de integrated.orders/order_items → business.insider_orders/order_items
+--   - Receita: migrado de SUM(item_order_total) → fpa.analytical_dre (product_name level)
+--   - Reversas: dedup mudou de (order_name, sku) → (order_name, id_reversa, sku)
+--   - Removidos campos: variant_title, full_item_name, variant_model,
+--     data_source_product_id, data_source_variant_id, item_order_total, amount_net_payment
+--
+-- Para a query atualizada, consulte o notebook unificado.
+-- ==============================================================================
 --
 -- Camada 2 — Tabela executiva agregada por produto   (output principal)
 -- Camada 1 — Tabela analítica item/reversa/tag       (auditoria e drill-down)

@@ -43,7 +43,17 @@ df = client.query("""
 """).to_dataframe()
 ```
 
-Credentials are loaded automatically from `secrets/`. Virtual environment: `.venv/` (`source .venv/bin/activate`).
+**SQL `{param}` placeholders:** SQL files in `analytics/*/sql/` use Python-style `{param_name}` placeholders (e.g., `{dia_ref}` in `stock_health_abc_icp.sql`). Substitute with `.format()` before executing:
+
+```python
+with open("sql/query.sql") as f:
+    sql = f.read().format(dia_ref="2026-06-05")
+df = client.query(sql).to_dataframe()
+```
+
+**BigQuery CTE style:** All SQL files use `WITH` blocks with `-- ─── N. Section name ─────` section headers. Each CTE is self-documented with its grain and purpose in a comment block at the top.
+
+Credentials are loaded automatically from `secrets/`. Virtual environment: `.venv-1/` (`source .venv-1/bin/activate`).
 
 ---
 
@@ -162,10 +172,12 @@ Pipeline de análise de **Trocas e Devoluções (T&D)** para priorização de me
 
 | Tabela | Projeto | Uso |
 |---|---|---|
-| `integrated.orders` | `insider-data-lake` | Pedidos válidos: `financial_status IN ('paid','partially_refunded')`, não teste/interno/cancelado |
-| `integrated.order_items` | `insider-data-lake` | Itens; filtro `store = 'shopify_insider-store-loja'`; dedup `(order_id, order_item_id)` |
-| `prepared_br.prepared__troquecommerce_order_details_br` | `insider-lake-sensitive` | Reversas; dedup `(order_name, sku) ORDER BY updated_at DESC`; filtro `status <> 'Cancelado'` |
-| `sop_silver.return_reason_tags` | `insider-data-lake` | Tags qualitativas; campo `tags` é ARRAY — usar `UNNEST(tags)`; dedup por `created_at DESC` |
+| `business.insider_orders` | `insider-data-lake` | Pedidos válidos: `order_status = 'paid'`, `is_cancelled = FALSE`, exclusão cupons internos (TF-/TFIN/IR/Item errado), lojas `shopify_insider-world` + `shopify_insider-store-loja` |
+| `business.insider_order_items` | `insider-data-lake` | Itens: `sku`, `quantity`, `product_title`, `variant_color`, `variant_size`. Sem dedup necessário — GROUP BY (order_id, sku) |
+| `fpa.analytical_dre` | `insider-data-lake` | Receita e volume: `revenue_after_discounts`, `non_refunded_quantity`. Grão: attribution-weighted (agregar por product_name via JOIN com orders + sku_dim) |
+| `integrated.skus` | `insider-data-lake` | Dimensão SKU: `product_name`, `category`, `gender`, `color`, `size`, `sku_state` (fallback para color/size) |
+| `prepared_br.prepared__troquecommerce_order_details_br` | `insider-lake-sensitive` | Reversas; dedup `(order_name, id_reversa, sku) ORDER BY updated_at DESC`; filtro `status <> 'Cancelado'`, `id_reversa IS NOT NULL` |
+| `sop_silver.return_reason_tags` | `insider-data-lake` | Tags qualitativas; campo `tags` é ARRAY — usar `UNNEST(tags)`; dedup por `created_at DESC`. ⚠️ Grão `(order_name, sku)` — sem `id_reversa` |
 | `sop_silver.portfolio_skp_clustering` | `insider-data-lake` | Cluster estratégico (`product_name`, `cluster`). **Grão: `product_name`, sem `sku`** |
 | `sop_bronze.eval_produto_portfolio` | `insider-data-lake` | Scorecard de portfólio com 3 pilares (ver abaixo) |
 
@@ -188,7 +200,7 @@ Os 3 pilares vêm **exclusivamente** de `sop_bronze.eval_produto_portfolio` — 
 ```
 commercial_score = 0.6 × percentil_receita + 0.4 × percentil_unidades
 td_score         = 0.5 × percentil_td_rate + 0.3 × percentil_volume_td + 0.2 × percentil_delta_vs_categoria
-priority_score   = 0.6 × td_score + 0.4 × commercial_score
+priority_score   = 0.5 × td_score + 0.5 × commercial_score
 ```
 
 | Sinal | Critério |
@@ -210,6 +222,17 @@ priority_score   = 0.6 × td_score + 0.4 × commercial_score
 - **Excel** (`export_priority_workbook`): abas `farol_executivo`, `resumo_farol`, `benchmark_categoria`, `resumo_tags`, `priorizar_melhoria`, `relatorio_pf` (scorecard × T&D × top 3 motivos em HTML para o time PF), `amostra_analitica`
 - **Tweet analítico** (`build_tweet_heuristic`): ≤80 palavras por produto, heurístico (sem LLM) — combina Top 3 tags (%), concentração cor/tamanho se ≥50%, T&D vs categoria, tendência
 - **Coluna `top_3_motivos_td`**: HTML (`<br>` entre itens), gerada por `build_scorecard_product_view`
+
+### `analyses/relatorio_td/td_analysis_functions.py` — Utility Module
+
+Pure-pandas, side-effect-free library for T&D pipelines (works in notebooks, scripts, or Streamlit). Key exports:
+
+- **`PrioritizationThresholds`** — frozen dataclass with canonical threshold values (`td_score_prioritize=0.70`, `commercial_score_prioritize=0.60`, etc.). **Keep in sync with the SQL `CASE` thresholds** in `02_td_farol_executivo_produto.sql`.
+- **`EXECUTIVE_REQUIRED_COLUMNS`** / **`ANALYTICAL_REQUIRED_COLUMNS`** — DataFrame contracts; `validate_columns()` enforces them at entry points.
+- **`classify_priority(df)`** — Python mirror of the SQL `sinal_priorizacao` CASE statement; use for QA / sensitivity analysis.
+- **`validate_no_tag_duplication(analytical_df, executive_df)`** — QA guardrail: confirms the executive T&D numerator was NOT built by summing tag rows (which would double-count).
+- **`build_llm_context_rows(df)`** — produces compact dicts for LLM summarizers (used by `build_tweet_heuristic` in the notebook).
+- **`TAG_TO_ACTION`** — maps raw tags → action categories (Modelagem, Grade, Tecido, Investigação adicional, PDP/Comunicação).
 
 ### Resultados de Referência (2026-06-11, últimos 12 meses)
 
@@ -272,6 +295,8 @@ This workspace uses the **Superpowers** methodology. Skills are in `skills/`. Re
 | Writing or reviewing code | `skills/requesting-code-review/SKILL.md` |
 | Creating new skills | `skills/writing-skills/SKILL.md` |
 | Creating, editing or exporting `.xlsx` / `.csv` files | `skills/sheets_writer/SKILL.md` |
+| Creating, generating, or **converting a local `.ipynb`** into a Deepnote-compatible notebook (SQL cells + BigQuery + Plotly) | `skills/deepnote-notebook/SKILL.md` |
+| User wants to learn a concept or topic (stateful, multi-session teaching) | `skills/teach/SKILL.md` |
 
 ### Workflow Order (mandatory)
 1. **brainstorming** → refine idea, get design approval
@@ -285,4 +310,4 @@ This workspace uses the **Superpowers** methodology. Skills are in `skills/`. Re
 - *"Let me just do this one thing"* → Check BEFORE doing anything.
 
 ### Available Skills
-`brainstorming` · `writing-plans` · `executing-plans` · `subagent-driven-development` · `systematic-debugging` · `verification-before-completion` · `test-driven-development` · `requesting-code-review` · `receiving-code-review` · `dispatching-parallel-agents` · `finishing-a-development-branch` · `using-git-worktrees` · `using-superpowers` · `writing-skills` · `data-storytelling` · `caveman` · `grill-me` · `handoff` · `teach` · `sheets_writer`
+`brainstorming` · `writing-plans` · `executing-plans` · `subagent-driven-development` · `systematic-debugging` · `verification-before-completion` · `test-driven-development` · `requesting-code-review` · `receiving-code-review` · `dispatching-parallel-agents` · `finishing-a-development-branch` · `using-git-worktrees` · `using-superpowers` · `writing-skills` · `data-storytelling` · `caveman` · `grill-me` · `handoff` · `teach` · `sheets_writer` · `deepnote-notebook`

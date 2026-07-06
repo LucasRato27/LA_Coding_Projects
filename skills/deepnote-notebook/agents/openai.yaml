@@ -1,0 +1,16 @@
+interface:
+  display_name: taurus deepnote notebook
+  short_description: Use when the task is to create or generate a Jupyter notebook
+    (.ipynb) with Deepnote SQL cell format, including BigQuery SQL cells that produce
+    named dataframe variables and Python cells with Plotly charts; examples - building
+    an analytics notebook, converting an HTML/Python script into a Deepnote notebook,
+    adding a SQL analysis section to an existing Deepnote notebook.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

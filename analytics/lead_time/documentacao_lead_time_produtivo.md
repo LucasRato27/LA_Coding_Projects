@@ -217,6 +217,36 @@ Sem esse ajuste, o lead time realizado de Triangulação seria comparado contra 
 
 ---
 
+### 3.5.1 Auditoria de lead time cadastrado zerado ou inválido
+
+O notebook passa a gerar uma camada auxiliar chamada `df_lead_time_cadastro_audit`
+para monitorar a qualidade do prazo teórico cadastrado. A regra considera lead time
+inválido quando o valor cadastrado é `0`, nulo, vazio, negativo, não numérico ou
+fica ausente após o join com a base de capacidade.
+
+A classificação de status do produto usa `sku_state` como fonte principal:
+`ativo_perene`, `ativo_em_lancamento`, `ativo_capsula`, `personalizacao`, `kit`,
+`active`, `ativo`, `enabled`, `publicado`, `disponivel`, `disponível` e `em linha`
+são classificados como `ativo`; `desativado`, `inativo`, `inactive`, `disabled`,
+`archived`, `descontinuado` e `fora de linha` são classificados como `inativo`.
+Qualquer valor fora desse mapa entra como `status_indeterminado`.
+
+A severidade crítica é restrita a produtos ativos:
+
+```sql
+is_active_product = true
+AND is_invalid_lead_time = true
+```
+
+Produtos com lead time cadastrado inválido são removidos de `df_capacity` antes de
+alimentar as análises principais. OPs que ficarem sem lead time teórico utilizável
+após o join entram em `df_lead_time_join_audit` com `lead_time_status =
+'ausente_pos_join'` e também são retiradas dos KPIs principais. O CSV
+`exports/lead_time_cadastrado_auditoria.csv` é gerado a cada execução para
+acompanhamento e correção cadastral.
+
+---
+
 ### 3.6 Etapas produtivas consideradas dentro do lead time
 
 O notebook decompõe o lead time em **sete etapas**, calculadas pela diferença em dias entre o primeiro registro de status em cada estágio produtivo:
