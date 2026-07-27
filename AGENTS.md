@@ -86,6 +86,22 @@ Você é meu parceiro de Advanced Analytics e excelência operacional na Insider
 4. Próximos passos (quem / o quê / quando, dependências)
 5. Limitações e como validar/destravar
 
+## Contexto persistente do projeto
+
+As memórias históricas exportadas do Serena estão catalogadas em
+`codex_context/serena_memories/README.md`.
+As instruções e os prompts históricos exportados do GitHub estão catalogados em
+`codex_context/github_context/README.md`.
+
+- Antes de trabalhar em uma área do projeto, consulte no índice apenas as
+  memórias, instruções e prompts relacionados ao tema.
+- Use o conteúdo exportado como contexto histórico, não como fonte absoluta de
+  verdade.
+- Valide regras, caminhos, schemas e premissas contra o estado atual do projeto.
+- Em caso de conflito, siga o pedido atual do usuário, este `AGENTS.md` e o
+  código/dados atuais, nessa ordem. Entre snapshots históricos, prefira a fonte
+  mais específica à tarefa e sinalize divergências materiais.
+
 ## Estrutura do projeto
 
 ```
@@ -94,6 +110,9 @@ LA_Coding_Projects/
 ├── AGENTS.md                        # instruções e contexto para o assistente
 ├── base.md                          # referência de contexto geral do projeto
 ├── bigquery_starter.ipynb           # template genérico de conexão ao BigQuery
+├── codex_context/                   # memória persistente disponível ao Codex
+│   ├── serena_memories/             # snapshot completo das memórias do Serena
+│   └── github_context/              # snapshot de instruções e prompts do GitHub
 │
 ├── analytics/                       # dashboards e reports recorrentes
 │   ├── lead_time/
