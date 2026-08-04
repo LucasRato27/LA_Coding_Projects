@@ -1,7 +1,8 @@
 # Memórias do Serena — índice para o Codex
 
-Este diretório é um snapshot fiel das memórias do Serena do projeto
-`LA_Coding_Projects`, exportado em 2026-07-27.
+Este diretório é um snapshot das memórias do Serena do projeto
+`LA_Coding_Projects`, exportado em 2026-07-27 e atualizado em 2026-08-04
+com as premissas fundamentais vigentes do dashboard de Lead Time.
 
 ## Regra de uso
 
@@ -43,9 +44,14 @@ Este diretório é um snapshot fiel das memórias do Serena do projeto
 
 ### Lead Time Dashboard
 
+- [`lead_time_dashboard/premissas_fundamentais_calculo.md`](lead_time_dashboard/premissas_fundamentais_calculo.md)
+- [`lead_time_dashboard/source_inventory.md`](lead_time_dashboard/source_inventory.md)
 - [`lead_time_dashboard/bases_e_premissas.md`](lead_time_dashboard/bases_e_premissas.md)
 - [`lead_time_dashboard/lead_time_limpo.md`](lead_time_dashboard/lead_time_limpo.md)
+- [`lead_time_dashboard/sla90_deepnote_premissas.md`](lead_time_dashboard/sla90_deepnote_premissas.md)
 - [`lead_time_dashboard/v2_deepnote_diferencas.md`](lead_time_dashboard/v2_deepnote_diferencas.md)
+- [`lead_time_dashboard/reformulacao_faixa_sla_e_memorial_calculo.md`](lead_time_dashboard/reformulacao_faixa_sla_e_memorial_calculo.md)
+- [`lead_time_dashboard/transicao_data_criacao_ingestion_created_at.md`](lead_time_dashboard/transicao_data_criacao_ingestion_created_at.md)
 
 ### Projeção de necessidade de produção
 
@@ -53,9 +59,13 @@ Este diretório é um snapshot fiel das memórias do Serena do projeto
 - [`20260422_projecao_nec_prod/modulo_simulacao_atendimento.md`](20260422_projecao_nec_prod/modulo_simulacao_atendimento.md)
 - [`20260422_projecao_nec_prod/visualizacao_e_regras.md`](20260422_projecao_nec_prod/visualizacao_e_regras.md)
 
-### Relatório T&D
+### Relatório T&D (priorização de produtos)
 
 - [`relatorio_td/pipeline_reversas.md`](relatorio_td/pipeline_reversas.md)
+
+### Tempo até Reversa & OKR de T&D (entrega/compra → reversa, KR mensal, HM semanal)
+
+- [`tempo_reversa_okr_td/pipeline_e_premissas.md`](tempo_reversa_okr_td/pipeline_e_premissas.md)
 
 ## Sincronização
 
