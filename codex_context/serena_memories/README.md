@@ -1,8 +1,8 @@
 # Memórias do Serena — índice para o Codex
 
 Este diretório é um snapshot das memórias do Serena do projeto
-`LA_Coding_Projects`, exportado em 2026-07-27 e atualizado em 2026-08-04
-com as premissas fundamentais vigentes do dashboard de Lead Time.
+`LA_Coding_Projects`, exportado em 2026-07-27 e reconciliado em 2026-08-06
+com as premissas vigentes do dashboard de Lead Time.
 
 ## Regra de uso
 
@@ -44,14 +44,21 @@ com as premissas fundamentais vigentes do dashboard de Lead Time.
 
 ### Lead Time Dashboard
 
+- [`lead_time_dashboard/handoff_governanca_lead_time_20260806.md`](lead_time_dashboard/handoff_governanca_lead_time_20260806.md) — **consultar primeiro**; referência vigente do notebook Deepnote, Ciclo Produtivo e último run validado.
+- [`lead_time_dashboard/handoff_governanca_lead_time_20260805.md`](lead_time_dashboard/handoff_governanca_lead_time_20260805.md) — handoff histórico, supersedido na referência do notebook pelo de 2026-08-06.
 - [`lead_time_dashboard/premissas_fundamentais_calculo.md`](lead_time_dashboard/premissas_fundamentais_calculo.md)
 - [`lead_time_dashboard/source_inventory.md`](lead_time_dashboard/source_inventory.md)
 - [`lead_time_dashboard/bases_e_premissas.md`](lead_time_dashboard/bases_e_premissas.md)
-- [`lead_time_dashboard/lead_time_limpo.md`](lead_time_dashboard/lead_time_limpo.md)
+- [`lead_time_dashboard/lead_time_limpo.md`](lead_time_dashboard/lead_time_limpo.md) — histórico de implementação; validar contra premissas vigentes.
 - [`lead_time_dashboard/sla90_deepnote_premissas.md`](lead_time_dashboard/sla90_deepnote_premissas.md)
-- [`lead_time_dashboard/v2_deepnote_diferencas.md`](lead_time_dashboard/v2_deepnote_diferencas.md)
+- [`lead_time_dashboard/v2_deepnote_diferencas.md`](lead_time_dashboard/v2_deepnote_diferencas.md) — histórico.
 - [`lead_time_dashboard/reformulacao_faixa_sla_e_memorial_calculo.md`](lead_time_dashboard/reformulacao_faixa_sla_e_memorial_calculo.md)
 - [`lead_time_dashboard/transicao_data_criacao_ingestion_created_at.md`](lead_time_dashboard/transicao_data_criacao_ingestion_created_at.md)
+- [`lead_time_dashboard/validacao_retroativa_created_at_vs_snapshot_20260804.md`](lead_time_dashboard/validacao_retroativa_created_at_vs_snapshot_20260804.md)
+- [`lead_time_dashboard/cohort_entrega_e_ciclo_produtivo_20260805.md`](lead_time_dashboard/cohort_entrega_e_ciclo_produtivo_20260805.md)
+- [`lead_time_dashboard/tipo_op_ciclo_hibrido_kpis_20260805.md`](lead_time_dashboard/tipo_op_ciclo_hibrido_kpis_20260805.md)
+- [`lead_time_dashboard/governanca_materia_prima_20260807.md`](lead_time_dashboard/governanca_materia_prima_20260807.md) — notebook `fabric_governance` (base de MP: tecido/artigo/malharia); documentação técnica completa em `analytics/lead_time/documentacao_governanca_materia_prima.md`.
+- [`lead_time_dashboard/supplier_in_governanca_mp_20260810.md`](lead_time_dashboard/supplier_in_governanca_mp_20260810.md) — **consultar primeiro para Supplier [IN]**; registra a primeira publicação no Sheets, contrato de exportação, cobertura atual do lake e decisão de ingestão.
 
 ### Projeção de necessidade de produção
 

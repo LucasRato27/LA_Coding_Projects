@@ -11,7 +11,7 @@ A v2 é essencialmente o MESMO pipeline e as MESMAS premissas de negócio (TARGE
 
 **v2 — mudanças**:
 - Filtro adicional `production_order_type = 'committed'` aplicado tanto em `ops_in_scope` quanto em `committed_history`, e também exige que o registro anterior (`prev_production_order_type`) também seja `'committed'` antes de contar a postergação. Isso evita contar mudanças de data que ocorreram enquanto a OP ainda não era `committed`.
-- **`dt_planned_original` agora é `MIN(dt_planned_entry_warehouse) WHERE dt_reviewed_entry_warehouse IS NOT NULL`** (antes era simplesmente o primeiro valor histórico, sem exigir `dt_reviewed_entry_warehouse` preenchido). Isso muda a data-baseline usada como referência "pré-postergação".
+- **Correção vigente desde 2026-07-27**: `dt_planned_original` voltou a ser a primeira `dt_planned_entry_warehouse` não nula observada no histórico committed da OP, ordenada por `ingestion_date` (`ARRAY_AGG(... ORDER BY ingestion_date ASC LIMIT 1)`). Não usar `MIN(dt_planned_entry_warehouse)` e não exigir `dt_reviewed_entry_warehouse` preenchida para definir a data original. Ver `mem:lead_time_dashboard/sla90_deepnote_premissas`.
 - **Nova condição-chave em `postponement_totals`: só conta como postergação intencional quando `prev_planned = prev_reviewed`** (ou seja, no snapshot anterior, a data planejada e a data revisada pelo fornecedor eram iguais — não havia uma revisão pendente/divergente). Isso é uma tentativa de isolar melhor postergação puramente interna (Insider) de casos em que o fornecedor já havia sinalizado uma revisão de prazo (`dt_reviewed_entry_warehouse` diferente do planejado), que não deveria ser tratada como "postergação intencional Insider".
 - **Impacto prático**: `qt_dias_postergacao_intencional` e `flag_teve_postergacao` por OP podem divergir entre as duas versões — a v2 é mais conservadora/precisa na atribuição de causa (menos falsos positivos de "postergação interna" quando na verdade havia uma revisão de fornecedor em curso).
 
@@ -51,3 +51,15 @@ A v2 é essencialmente o MESMO pipeline e as MESMAS premissas de negócio (TARGE
 - Fórmula de `lead_time_ajustado = (bruto - qt_dias_postergacao_intencional).clip(lower=0)` e lógica de `etapa_inflada` (baseline por OPs sem postergação, desvio positivo vs. mediana)
 - `FALLBACK_TRI_DIAS = 60`
 - ETAPAS_COLS (7 etapas) — porém `ETAPAS_LABELS` mudou de texto: v1 usava "Criação→agd, Agd→valid MP, Valid→corte, Corte exec, Costura, Inspeção, Fat→estoque"; v2 usa "Criação, Agd da OP, Aguardo MP, Aguardo Corte, Costura, Inspeção, Faturamento" (apenas rótulos de exibição, mesma ordem/semântica)
+
+## 6. Data de criação canônica — decisão de 2026-08-04
+
+- As bases principal e trimestral usam exclusivamente
+  `TIMESTAMP(DATE(MIN(created_at)))` como `stamp_created_production_order`.
+- O fallback para a primeira aparição por `ingestion_date` foi removido.
+- OP sem `created_at` é identificada como `missing_created_at` e não entra nos
+  KPIs dependentes de criação.
+- Casos com `created_at` posterior ao planejado ou à entrega são auditados e
+  excluídos antes dos indicadores.
+- Todo o restante da metodologia PA/Tri, postergação, filtros, cohort e faixas
+  de prazo permanece inalterado.

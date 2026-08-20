@@ -1,7 +1,11 @@
 # Governança de Lead Time Produtivo — Insider Store
 ### Documentação Executiva e Metodológica
 
-> **Versão de referência:** cohort jan/2026–mai/2026 · 880 OPs analisadas · Última execução: maio/2026
+> **Documento histórico:** cohort jan/2026–mai/2026 · 880 OPs analisadas · Última execução: maio/2026.
+>
+> Não usar os números, o cohort ou as regras desta versão como fonte vigente.
+> Para documentação atual, consulte `README.md`,
+> `documentacao_governanca_lead_time.md` e o handoff Serena de 2026-08-06.
 
 ---
 

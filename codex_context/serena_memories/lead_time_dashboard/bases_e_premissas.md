@@ -26,8 +26,16 @@ Projeto BigQuery: `insider-data-lake` (principal) + `insider-lake-sensitive` (da
 - Grão: `(op_code, product_sku, ingestion_date)` — 1 linha por op_code após agregação (`ANY_VALUE`/`MAX`/`MIN` por op_code)
 - Stamps extraídos via `MIN(ingestion_date)` por `current_production_stage`:
   `order_request_validation → waiting_fabric_arrival → fabric_validation_and_pre_cutting → cut_fabric_and_sewing_process → quality_inspection → items_delivery_and_invoicing → finished`
-- **Filtros SQL obrigatórios**: `dt_planned_entry_warehouse` dentro do cohort (`data_inicio`/`data_fim`, configurável Célula 1.5); filtro opcional de `supplier_name`;
-  `supplier_relationship_status IS NULL OR NOT IN ('terminated','discontinued')`; `current_production_stage != 'canceled'`; `sku_status` NÃO contém 'desativado' (regex, case-insensitive)
+- A extração ampla preserva OPs no grão de `op_code`, `dt_planned_original` e
+  `is_op_open` mais recente. O Dashboard Geral aplica seu cohort de entrega
+  no pré-processamento; Ciclo Produtivo usa a extração ampla com janela própria.
+- Filtros estruturais: tipo de OP selecionado, `current_production_stage !=
+  'canceled'` e ciclos sem B2B/EPA. Fornecedor encerrado e SKU desativado são
+  preservados como histórico válido.
+- Todas as leituras da fonte de OPs aplicam `production_order_type = 'committed'` na própria SQL. `ANY_VALUE(production_order_type)` pode ser preservado na agregação e o filtro no dataframe permanece como defesa adicional.
+- `stamp_created_production_order = TIMESTAMP(DATE(MIN(created_at)))`. Não há
+  fallback para o primeiro `ingestion_date`; OP sem `created_at` fica fora de
+  KPIs dependentes de criação.
 
 ### Célula 2.5 — SQL_POSTPONEMENT (df_postponement): postergação intencional por OP
 - Mesma fonte `sop_silver.supply_chain_efficiency_model_input_history`
@@ -86,10 +94,19 @@ Projeto BigQuery: `insider-data-lake` (principal) + `insider-lake-sensitive` (da
 ## Auditoria e saneamento de dados (guard rails)
 
 1. **LT cadastrado inválido** (zerado/nulo/negativo) em produto ATIVO → removido de `df_capacity`, listado em `df_lead_time_cadastro_audit`
-2. **Join sem LT teórico após merge** (`df_ops` × `capacity_lt`) → OP removida das análises, registrada em `df_lead_time_join_audit` com `lead_time_status='ausente_pos_join'`
+2. **Join sem LT teórico após merge** → OP permanece nas análises realizadas e
+   de Ciclo Produtivo; é registrada em `df_lead_time_join_audit` e excluída
+   somente de consumidores que dependem do LT teórico.
 3. Ambas auditorias compartilham o mesmo schema de colunas para consolidação/export
+4. OP com `created_at` posterior a `dt_planned_original` ou, quando entregue,
+   posterior a `dt_largest_entry_warehouse` é registrada em
+   `df_creation_chronology_audit` e excluída dos KPIs.
 
 ## Filtros interativos (Célula 1.5 — pensados para Deepnote)
 
 - `supplier_filtro`, `product_filtro` ('(Todos)' = sem filtro)
-- `data_inicio` (padrão '2026-01'), `data_fim` (padrão = mês atual) — aplicados em `dt_planned_entry_warehouse`
+- `data_inicio` (padrão '2026-01'), `data_fim` (padrão = mês atual) — aplicados em `dt_planned_original`, com o mesmo limite superior exclusivo de `data_fim + 1 mês` nas seções Geral e SLA
+
+## Seção Deepnote — governança de SLA planejado <100 dias
+
+As regras vigentes da seção antes chamada “SLA-90” — incluindo `sla_planejado_dias`, `lead_time_realizado`, threshold, taxonomia Base/Extra, mês-alvo, KPIs, gráficos e exportação — estão consolidadas em `mem:lead_time_dashboard/sla90_deepnote_premissas`.

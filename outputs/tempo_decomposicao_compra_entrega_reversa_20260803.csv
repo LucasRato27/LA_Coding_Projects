@@ -1,4 +1,0 @@
-etapa,mediana_dias,media_dias
-compra -> entrega (envio),5.0,7.0
-entrega -> reversa (decisao),2.0,5.8
-compra -> reversa (total),8.0,12.9

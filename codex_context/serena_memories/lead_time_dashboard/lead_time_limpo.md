@@ -59,6 +59,10 @@ etapa_valid_corte_exec, etapa_costura, etapa_inspecao, etapa_fat_estoque
 ```
 PA: etapa_criacao_agd = NaN (lead time PA começa em stamp_stage_waiting_fabric_arrival)
 
+Tri: o início `stamp_created_production_order` usa exclusivamente `created_at`.
+Não usar o primeiro snapshot como fallback; OP sem `created_at` fica fora dos
+KPIs dependentes de criação.
+
 ## Riscos conhecidos
 - Se baseline limpa for pequena (<30 OPs), medianas de referência podem não ser representativas (validação sinaliza)
 - OPs com todos os stamps NaN: etapa_inflada = None (tratado)

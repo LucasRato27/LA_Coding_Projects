@@ -6,3 +6,6 @@ secrets/
 .serena/
 __pycache__/
 *.pyc
+
+# Dados gerados por notebooks (mantém estrutura via .gitkeep)
+outputs/**/*.csv
